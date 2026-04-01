@@ -45,7 +45,7 @@ async function sendEmail() {
     });
   });
 
-  const reportLink = "https://Naveen-1a.github.io/Regression_CM/";
+  const reportLink = "https://Naveen-1a.github.io/Regression_CM/ortoni-report/";
 
   // 🔹 Email setup
   let transporter = nodemailer.createTransport({

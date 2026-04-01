@@ -11,6 +11,8 @@ export default defineConfig({
 
   reporter: [
     ['list'],
+    ['json', { outputFile: 'test-results/results.json' }], // ✅ needed for email
+    ['html', { outputFolder: 'playwright-report', open: 'never' }], // ✅ optional but useful
     ['ortoni-report', {
       open: 'never',
       folder: 'ortoni-report',

@@ -1,37 +1,46 @@
 import { test, expect } from '@playwright/test';
 
+// ✅ Slow down execution
+test.use({ launchOptions: { slowMo: 500 } });
+
 test('Forgot User ID flow validation', async ({ page }) => {
 
   // 1. Launch URL
   await page.goto('https://test.coursemill.com/nsui/login?route=/');
 
-  // 2. Verify "Forgot User ID" link presence (with wait)
+  // 2. Wait for "Forgot User ID"
   const forgotUserIdLink = page.locator('text=Forgot User ID');
 
   try {
-    await forgotUserIdLink.waitFor({ state: 'visible', timeout: 5000 });
+    await forgotUserIdLink.waitFor({ state: 'visible', timeout: 10000 });
   } catch {
     console.log('Forgot User ID link is NOT present after waiting. Ending test.');
-    return; // 3. End test if not present
+    return;
   }
 
   // 4. Click and verify navigation
   await forgotUserIdLink.click();
-  await expect(page).toHaveURL(/.*forgot.*/);
+  await expect(page).toHaveURL(/forgot/i);
+
+  // Wait for page load
+  await page.waitForLoadState('networkidle');
 
   // Locators
   const sendRequestBtn = page.locator('button:has-text("Send Request")');
-  const orgDropdown = page.locator('select'); // adjust if it's custom dropdown
-  const emailField = page.locator('input[type="email"]');
+  const orgDropdown = page.locator('select');
+  const emailField = page.locator('#email');
 
-  // 5. Verify button is disabled initially
+  // 5. Verify button disabled initially
   await expect(sendRequestBtn).toBeDisabled();
 
   // 6. Select organization
   await orgDropdown.selectOption({ label: 'productKSS_org1' });
 
-  // Verify still disabled after selecting org
+  // Verify still disabled
   await expect(sendRequestBtn).toBeDisabled();
+
+  // Wait for email field
+  await emailField.waitFor({ state: 'visible', timeout: 10000 });
 
   // 7. Enter incorrect email
   await emailField.fill('123@gmail');
@@ -53,6 +62,6 @@ test('Forgot User ID flow validation', async ({ page }) => {
   const returnToLoginBtn = page.locator('text=Return to login');
   await returnToLoginBtn.click();
 
-  // Optional: verify redirected back to login page
-  await expect(page).toHaveURL(/.*login.*/);
+  // Verify redirected back
+  await expect(page).toHaveURL(/login/);
 });

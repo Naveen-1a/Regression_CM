@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {"regression": "npx playwright test tests/delete.spec.ts && npx playwright test tests/login.spec.ts && npx playwright test tests/Forgotpassword.spec.ts && npx playwright test tests/registerfornewacc.spec.ts && npx playwright test tests/CourseCatalog.spec.ts && npx playwright test tests/Calendar.spec.ts && npx playwright test tests/News.spec.ts && npx playwright test tests/Resource.spec.ts && npx playwright test tests/Help.spec.ts && npx playwright test tests/EditProfile.spec.ts"},
   "keywords": [],
   "author": "",
   "license": "ISC",

@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+const fs = require('fs');
+
+test.setTimeout(90000);
 
 test('CourseMill - Add Organization validation', async ({ page }) => {
 
@@ -14,17 +17,14 @@ test('CourseMill - Add Organization validation', async ({ page }) => {
   // ---- Navigation ----
   await page.click('span:has-text("Admin Tasks")');
   await page.click('a[name="Manage Orgs"]');
-
   await page.waitForTimeout(2000);
 
   // ---- Click Add Organization ----
   await page.locator('#addorg').click();
-
   await page.waitForTimeout(2000);
 
   // ---- Find correct frame dynamically ----
   let targetFrame;
-
   for (let i = 0; i < 20; i++) {
     for (const frame of page.frames()) {
       if (await frame.locator('#orgIDTb').count() > 0) {
@@ -52,7 +52,6 @@ test('CourseMill - Add Organization validation', async ({ page }) => {
   // ===============================
   await orgIdField.fill('');
   await orgDescField.fill('');
-
   await orgIdField.click();
   await orgIdField.type('Org123', { delay: 100 });
 
@@ -68,7 +67,6 @@ test('CourseMill - Add Organization validation', async ({ page }) => {
   // ===============================
   await orgIdField.fill('');
   await orgDescField.fill('');
-
   await orgDescField.click();
   await orgDescField.type('Test Description', { delay: 100 });
 
@@ -84,10 +82,8 @@ test('CourseMill - Add Organization validation', async ({ page }) => {
   // ===============================
   await orgIdField.fill('');
   await orgDescField.fill('');
-
   await orgIdField.click();
   await orgIdField.type('@#$%', { delay: 100 });
-
   await orgDescField.click();
   await orgDescField.type('Test Description', { delay: 100 });
 
@@ -105,14 +101,15 @@ test('CourseMill - Add Organization validation', async ({ page }) => {
 
   await orgIdField.fill('');
   await orgDescField.fill('');
-
   await orgIdField.click();
   await orgIdField.type(validOrgId, { delay: 100 });
-
   await orgDescField.click();
   await orgDescField.type('Valid Organization', { delay: 100 });
 
   await expect(saveBtn).toBeEnabled();
   await saveBtn.click({ force: true });
+
+  // ✅ Store Org ID (ONLY ADDITION)
+  fs.writeFileSync('orgData.json', JSON.stringify({ orgId: validOrgId }, null, 2));
 
 });

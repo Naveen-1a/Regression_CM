@@ -37,71 +37,60 @@ test.describe.serial('CourseMill NSUI - Transcript Functionality', () => {
     console.log('✅ Reached the Transcript page.');
 
     // ==========================================================
-    // 📅 PART 3: Enter Dates & Close Popups
+    // 📅 PART 3: Human Calendar Interaction (Vue Datepicker Fix)
     // ==========================================================
     const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    const startDateStr = '2026-04-02';
+    const todayDayStr = String(today.getDate()); // Extracts the day number (e.g., "16")
+    const startDayStr = '2'; // Represents 2026-04-02
 
-    console.log(`📅 Setting Enrollment Start Date: ${startDateStr}`);
-    console.log(`📅 Setting Enrollment End Date: ${todayStr}`);
+    console.log(`📅 Physically clicking Calendar Start Date: Day ${startDayStr}`);
+    console.log(`📅 Physically clicking Calendar End Date: Day ${todayDayStr}`);
 
-    const setDatepickerValue = async (index: number, dateValue: string) => {
+    // 🛑 VUE DATEPICKER FIX: Physically click the calendar popup
+    const selectDateFromCalendar = async (index: number, dayToSelect: string) => {
         const dateInput = page.locator('input[aria-label="Datepicker input"]').nth(index);
         
-        // Remove readonly and set the value natively
-        await dateInput.evaluate((node: HTMLInputElement, val) => {
-            node.removeAttribute('readonly'); 
-            node.value = val;
-            node.dispatchEvent(new Event('input', { bubbles: true }));
-            node.dispatchEvent(new Event('change', { bubbles: true }));
-        }, dateValue);
-
-        // Click to trigger Vue, press Enter to confirm
+        // 1. Click the input to open the calendar dropdown
         await dateInput.click({ force: true });
-        await page.waitForTimeout(200);
-        await page.keyboard.press('Enter');
-        
-        // 🛑 CRITICAL FIX: Press Escape to force the calendar popup to close!
-        // If we don't do this, it blocks the checkboxes and buttons.
+        await page.waitForTimeout(500); // Wait for the animation to finish
+
+        // 2. Find the calendar popup (.dp__menu) and click the exact day number
+        const calendarPopup = page.locator('.dp__menu').first();
+        await calendarPopup.getByText(dayToSelect, { exact: true }).first().click({ force: true });
+        await page.waitForTimeout(500);
+
+        // 3. Force close the calendar so it doesn't block the Run Report button
         await page.keyboard.press('Escape'); 
-        await page.waitForTimeout(300);
+        await page.waitForTimeout(500);
     };
 
-    await setDatepickerValue(0, startDateStr);
-    await setDatepickerValue(1, todayStr);
-    
-    // Click a safe area (like the header text) to guarantee all overlays are dismissed
-    await page.getByText('Enrollment Start Date').click({ force: true });
-    console.log('✅ Dates successfully set and popups closed.');
+    // Index 0 = Start Date, Index 1 = End Date
+    await selectDateFromCalendar(0, startDayStr);
+    await selectDateFromCalendar(1, todayDayStr);
+    console.log('✅ Dates successfully clicked and popups closed.');
 
     // ==========================================================
-    // ⚙️ SETUP: Map the Checkbox Elements
+    // ⚙️ SETUP: Map the Checkbox Element
     // ==========================================================
-    // First checkbox on the page is Summary, second is Inactive Courses
-    const summaryInput = page.locator('input[type="checkbox"]').nth(0);
-    // The exact text we want to click
-    const summaryTextLabel = page.getByText('Summary Transcript', { exact: true });
+    const summaryCheckbox = page.locator('input[data-test="ui-input-checkbox"]').first();
 
     // ==========================================================
     // 📊 PART 4: Standard Transcript Report
     // ==========================================================
-    console.log('⚙️ Preparing standard transcript report...');
+    console.log('\n⚙️ Preparing standard transcript report...');
     
-    // Process: Uncheck if already selected
-    let isCurrentlyChecked = await summaryInput.isChecked();
-    if (isCurrentlyChecked) {
-        console.log('☑️ Summary is currently checked. Clicking the text label to uncheck it...');
-        await summaryTextLabel.click();
-        await page.waitForTimeout(500);
-    }
+    // 🛑 CHECKBOX FIX: Force uncheck using Playwright's native method
+    console.log('☑️ Ensuring Summary Transcript is UNCHECKED...');
+    await summaryCheckbox.uncheck({ force: true });
+    await page.waitForTimeout(500);
 
-    console.log('⚙️ Running standard report...');
+    console.log('⚙️ Clicking Run Report...');
     const runReportBtn = page.locator('button', { hasText: /Run Report/i }).first();
-    await runReportBtn.click();
+    await runReportBtn.click({ force: true });
     
+    console.log('⏳ Waiting for report generation...');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000); 
+    await page.waitForTimeout(3000); 
 
     const downloadReportBtn = page.locator('button', { hasText: /Download Report/i }).first();
     const isStandardDownloadAvailable = await downloadReportBtn.isVisible();
@@ -111,7 +100,7 @@ test.describe.serial('CourseMill NSUI - Transcript Functionality', () => {
         
         const [reportTab] = await Promise.all([
             context.waitForEvent('page'),
-            downloadReportBtn.click()
+            downloadReportBtn.click({ force: true })
         ]);
         
         console.log('👀 New tab opened! Observing the report for 3 seconds...');
@@ -133,19 +122,17 @@ test.describe.serial('CourseMill NSUI - Transcript Functionality', () => {
     // ==========================================================
     console.log('\n⚙️ Preparing summary transcript report...');
     
-    // Process: Check if not selected
-    isCurrentlyChecked = await summaryInput.isChecked();
-    if (!isCurrentlyChecked) {
-        console.log('☑️ Summary is not checked. Clicking the text label to check it...');
-        await summaryTextLabel.click();
-        await page.waitForTimeout(500);
-    }
+    // 🛑 CHECKBOX FIX: Force check using Playwright's native method
+    console.log('☑️ Ensuring Summary Transcript is CHECKED...');
+    await summaryCheckbox.check({ force: true });
+    await page.waitForTimeout(500);
 
-    console.log('⚙️ Running summary report...');
-    await runReportBtn.click();
+    console.log('⚙️ Clicking Run Report...');
+    await runReportBtn.click({ force: true });
     
+    console.log('⏳ Waiting for summary report generation...');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000); 
+    await page.waitForTimeout(3000); 
 
     const isSummaryDownloadAvailable = await downloadReportBtn.isVisible();
 
@@ -154,7 +141,7 @@ test.describe.serial('CourseMill NSUI - Transcript Functionality', () => {
         
         const [summaryReportTab] = await Promise.all([
             context.waitForEvent('page'),
-            downloadReportBtn.click()
+            downloadReportBtn.click({ force: true })
         ]);
         
         console.log('👀 New tab opened! Observing the summary report for 3 seconds...');

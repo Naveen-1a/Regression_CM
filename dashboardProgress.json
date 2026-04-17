@@ -1,0 +1,80 @@
+{
+  "courses": [
+    {
+      "name": "Test Course - Self Enroll 01",
+      "status": "Not Attempted"
+    },
+    {
+      "name": "Test Course - Self Enroll - Access code 01",
+      "status": "Not Attempted"
+    },
+    {
+      "name": "Test Course - Self enroll - Due Date",
+      "status": "Not Attempted"
+    },
+    {
+      "name": "Test Course - Self Enroll - Prerequisites",
+      "status": "Not Attempted"
+    },
+    {
+      "name": "Test Course - Self Enroll 02",
+      "status": "Not Attempted"
+    },
+    {
+      "name": "Test Course - Self Enroll 03",
+      "status": "Not Attempted"
+    },
+    {
+      "name": "Test Course - Self Enroll - Access code 02",
+      "status": "Not Attempted"
+    },
+    {
+      "name": "Test Course - Self Enroll - Access code 03",
+      "status": "Not Attempted"
+    },
+    {
+      "name": "Test Curriculum - Self Enroll 001",
+      "status": "Not Attempted"
+    },
+    {
+      "name": "Test Curriculum - Self Enroll 002",
+      "status": "Not Attempted"
+    },
+    {
+      "name": "Test Curriculum - Self Enroll 003",
+      "status": "Not Attempted"
+    },
+    {
+      "name": "Test Curriculum - Self Enroll - Access Code 001",
+      "status": "Not Attempted"
+    },
+    {
+      "name": "Test Curriculum - Self Enroll - Access Code 002",
+      "status": "Not Attempted"
+    },
+    {
+      "name": "Test Curriculum - Self Enroll - Access Code 003",
+      "status": "Not Attempted"
+    },
+    {
+      "name": "Test Curriculum - Self Enroll - Expiration Date",
+      "status": "Not Attempted"
+    },
+    {
+      "name": "Test Course - Self Enroll - Expiry date",
+      "status": "Not Attempted"
+    },
+    {
+      "name": "Test Course",
+      "status": "Not Attempted"
+    },
+    {
+      "name": "Test Course - Self Enroll - Expiry date",
+      "status": "Incomplete"
+    },
+    {
+      "name": "Test Course",
+      "status": "Completed"
+    }
+  ]
+}

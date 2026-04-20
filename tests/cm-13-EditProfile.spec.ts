@@ -117,10 +117,10 @@ test.describe.serial('CourseMill NSUI - Edit Profile Functionality', () => {
         currentPassword = JSON.parse(fs.readFileSync(credsFile, 'utf8')).password;
     }
 
-    // Generate Professional Dynamic Profile Data using "Naveen"
+    // Generate Professional Dynamic Profile Data using "EditProfile"
     const ts = Date.now().toString().slice(-4);
     const dynamicData = {
-        firstName: `Naveen${ts}`,
+        firstName: `EditProfile${ts}`,
         lastName: `S${ts}`,
         address: `${ts} Enterprise Parkway`,
         city: `Seattle`,

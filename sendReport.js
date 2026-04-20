@@ -3,7 +3,6 @@ const fs = require("fs");
 const path = require("path");
 
 async function sendEmail() {
-
   // 🔹 Read Playwright JSON report
   const rawData = fs.readFileSync("test-results/results.json", "utf-8");
   const results = JSON.parse(rawData);
@@ -14,36 +13,50 @@ async function sendEmail() {
   let failedTests = [];
   let attachments = [];
 
-  // 🔹 Extract results
-  results.suites.forEach(suite => {
-    suite.specs.forEach(spec => {
-      spec.tests.forEach(test => {
-        total++;
+  // 🛑 FIX: Recursive function to find ALL tests, even inside nested test.describe blocks
+  function processSuite(suite) {
+    // 1. Process specs in the current suite
+    if (suite.specs) {
+      suite.specs.forEach(spec => {
+        spec.tests.forEach(test => {
+          total++;
+          
+          // Get the last result in case there were auto-retries
+          const result = test.results[test.results.length - 1]; 
+          const status = result.status;
 
-        const result = test.results[0];
-        const status = result.status;
+          if (status === "passed" || status === "expected") {
+            passed++;
+          } else {
+            failed++;
+            failedTests.push(spec.title);
 
-        if (status === "passed") {
-          passed++;
-        } else {
-          failed++;
-          failedTests.push(spec.title);
-
-          // 🔥 Attach screenshots
-          if (result.attachments) {
-            result.attachments.forEach(att => {
-              if (att.name === "screenshot" && att.path) {
-                attachments.push({
-                  filename: path.basename(att.path),
-                  path: att.path
-                });
-              }
-            });
+            // 🔥 Attach screenshots
+            if (result.attachments) {
+              result.attachments.forEach(att => {
+                if (att.name === "screenshot" && att.path) {
+                  attachments.push({
+                    filename: path.basename(att.path),
+                    path: att.path
+                  });
+                }
+              });
+            }
           }
-        }
+        });
       });
-    });
-  });
+    }
+
+    // 2. Recursively process any nested suites (test.describe blocks)
+    if (suite.suites) {
+      suite.suites.forEach(processSuite);
+    }
+  }
+
+  // Start processing from the top level
+  if (results.suites) {
+    results.suites.forEach(processSuite);
+  }
 
   const reportLink = "https://Naveen-1a.github.io/Regression_CM/ortoni-report/";
 
@@ -71,7 +84,6 @@ async function sendEmail() {
         <p>Hello Team,</p>
         <p>The test execution has been completed. Here is the summary:</p>
 
-        <!-- 🔹 Summary Cards -->
         <div style="display:flex; justify-content:space-between; margin:20px 0;">
           
           <div style="flex:1; margin-right:10px; padding:15px; background:#eef2ff; border-radius:8px; text-align:center;">
@@ -91,7 +103,6 @@ async function sendEmail() {
 
         </div>
 
-        <!-- 🔹 Execution Info -->
         <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
           <tr>
             <td style="padding:8px;"><b>Execution Time</b></td>
@@ -99,7 +110,6 @@ async function sendEmail() {
           </tr>
         </table>
 
-        <!-- 🔹 Failed Tests -->
         ${
           failed > 0
             ? `
@@ -117,7 +127,6 @@ async function sendEmail() {
             `
         }
 
-        <!-- 🔹 Button -->
         <div style="text-align:center; margin:25px 0;">
           <a href="${reportLink}" 
              style="background:#28a745; color:white; padding:12px 20px; text-decoration:none; border-radius:6px; font-weight:bold;">
@@ -125,7 +134,6 @@ async function sendEmail() {
           </a>
         </div>
 
-        <!-- 🔹 Footer -->
         <p style="font-size:12px; color:#666;">
           Report Link:<br/>
           <a href="${reportLink}">${reportLink}</a>
@@ -141,7 +149,7 @@ async function sendEmail() {
 
   await transporter.sendMail(mailOptions);
 
-  console.log("✅ Enhanced email sent successfully with screenshots!");
+  console.log("✅ Enhanced email sent successfully with all " + total + " tests counted!");
 }
 
 sendEmail();
